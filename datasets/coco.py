@@ -24,7 +24,7 @@ import random
 def Brightness(bgr):
     hsv = cv2.cvtColor(bgr, cv2.COLOR_RGB2HSV)
     h, s, v = cv2.split(hsv)
-    adjust = random.uniform(0.7, 0.9)
+    adjust = random.uniform(0.05, 0.3)
     v = v * adjust
     v = np.clip(v, 0, 255).astype(hsv.dtype)
     hsv = cv2.merge((h, s, v))
@@ -48,10 +48,12 @@ class CocoTrainDataset(Dataset):
     def __getitem__(self, idx):
         label = copy.deepcopy(self._labels[idx])  # label modified in transform
         image = cv2.imread(os.path.join(self._images_folder, label['img_paths']), cv2.IMREAD_COLOR)
-        if rand():
-            image = Brightness(image)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        
+        image = Brightness(image)
+        
+        if rand(0.3):
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
         
         mask = np.ones(shape=(label['img_height'], label['img_width']), dtype=np.float32)
         mask = get_mask(label['segmentations'], mask)
