@@ -20,7 +20,20 @@ def get_mask(segmentations, mask):
         mask[pycocotools.mask.decode(rle) > 0.5] = 0
     return mask
 
-
+import random
+def Brightness(bgr):
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_RGB2HSV)
+    h, s, v = cv2.split(hsv)
+    adjust = random.uniform(0.7, 0.9)
+    v = v * adjust
+    v = np.clip(v, 0, 255).astype(hsv.dtype)
+    hsv = cv2.merge((h, s, v))
+    bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+    return bgr
+def rand(v = 0.6):
+    if random.random() > v:
+        return True
+    return False
 class CocoTrainDataset(Dataset):
     def __init__(self, labels, images_folder, stride, sigma, paf_thickness, transform=None):
         super().__init__()
@@ -35,6 +48,11 @@ class CocoTrainDataset(Dataset):
     def __getitem__(self, idx):
         label = copy.deepcopy(self._labels[idx])  # label modified in transform
         image = cv2.imread(os.path.join(self._images_folder, label['img_paths']), cv2.IMREAD_COLOR)
+        if rand():
+            image = Brightness(image)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        
         mask = np.ones(shape=(label['img_height'], label['img_width']), dtype=np.float32)
         mask = get_mask(label['segmentations'], mask)
         sample = {

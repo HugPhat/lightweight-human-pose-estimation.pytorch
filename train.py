@@ -35,7 +35,8 @@ def train(prepared_train_labels, train_images_folder, num_refinement_stages, bas
                                    Scale(),
                                    Rotate(pad=(128, 128, 128)),
                                    CropPad(pad=(128, 128, 128)),
-                                   Flip()]))
+                                   Flip()
+                                   ]))
     train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
     optimizer = optim.Adam([
